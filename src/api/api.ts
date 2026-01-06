@@ -25,7 +25,7 @@ export async function createStudent(form) {
   })
 }
 
-export async function updateStudent(student) {
+export async function updateStudent(student: any) {
   await api.put(`/students/${student.id}`, {
     email: student.email,
     first_name: student.first_name,
@@ -50,10 +50,29 @@ export async function unenrollStudent(studentId: string, courseId: string) {
   await api.delete(`/students/${studentId}/courses/${courseId}`);
 }
 
-export async function createCourse(form) {
+export async function createCourse(form: any) {
   const v = form.value;
   await api.post('/courses', {
     title: v.title,
     description: v.description ?? '',
   })
+}
+
+export async function getSpecificCourse(courseId: string) {
+  return await api.get(`/courses/${courseId}`)
+}
+
+export async function deleteCourse(courseId: string) {
+  await api.delete(`/courses/${courseId}`);
+}
+
+export async function updateCourse(courseId: string, courseTitle: string, courseDescription: string) {
+  await api.put(`/courses/${courseId}`, {
+    title: courseTitle,
+    description: courseDescription,
+  });
+}
+
+export async function getStudentsEnrolledInCourse(courseId: string) {
+  return await api.get(`/courses/${courseId}/students`)
 }

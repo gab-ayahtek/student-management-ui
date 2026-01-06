@@ -40,6 +40,16 @@ const router = createRouter({
       component: () => import('../pages/courses/CourseCreateView.vue')
     },
     {
+      path: '/courses/:id/edit',
+      name: 'courseEdit',
+      component: () => import('../pages/courses/CourseEditView.vue')
+    },
+    {
+      path: '/courses/:id',
+      name: 'courseShow',
+      component: () => import('../pages/courses/CourseShowView.vue')
+    },
+    {
       path: '/:pathMatch(.*)*', // Matches all unmatched routes
       name: 'NotFound',
       component: () => import('../pages/NotFoundView.vue'),

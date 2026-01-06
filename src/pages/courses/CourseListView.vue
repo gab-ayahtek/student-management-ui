@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { getCourseList } from '../../api/api'
+import { deleteCourse, getCourseList } from '../../api/api'
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -12,6 +12,21 @@ async function fetchCourses() {
 
 function createCourse() {
   router.push('/courses/create')
+}
+
+function viewCourse(courseId: string) {
+  router.push(`/courses/${courseId}`)
+}
+
+function editCourse(courseId: string, courseTitle: string, courseDescription: string) {
+  router.push(`/courses/${courseId}/edit`);
+}
+
+async function handleDelete(courseTitle: string, courseId: string) {
+  if (confirm(`Delete ${courseTitle}?`)) {
+    await deleteCourse(courseId);
+    window.location.reload();
+  }
 }
 
 onMounted(fetchCourses)
@@ -39,9 +54,11 @@ onMounted(fetchCourses)
         <tr v-for="course in courses" :key="course.id" v-if="courses.length > 0">
           <td>{{ course.title }}</td>
           <td class="text-nowrap">
-            <button class="btn btn-primary me-2">View</button>
-            <button class="btn btn-warning me-2">Update</button>
-            <button class="btn btn-danger">Delete</button>
+            <button @click="viewCourse(course.id, course.title, course.description)"
+              class="btn btn-primary me-2">View</button>
+            <button @click="editCourse(course.id, course.title, course.description)"
+              class="btn btn-warning me-2">Update</button>
+            <button @click="handleDelete(course.title, course.id)" class="btn btn-danger">Delete</button>
           </td>
         </tr>
 
