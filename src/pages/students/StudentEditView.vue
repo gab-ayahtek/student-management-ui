@@ -1,10 +1,17 @@
 <script lang="ts" setup>
-import { updateStudent } from '@/api/api';
+import { getSpecificStudent, updateStudent } from '@/api/api';
+import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter();
-const student = JSON.parse(route.query.student)
+const student = ref({
+  id: '',
+  email: '',
+  first_name: '',
+  last_name: '',
+  address: '',
+});
 
 async function handleSubmit() {
   try {
@@ -14,6 +21,9 @@ async function handleSubmit() {
     alert(error.response.data.message);
   }
 }
+onMounted(async () => {
+  student.value = await getSpecificStudent(route.params.id)
+})
 </script>
 <template>
   <h1 class="mb-3">Edit student</h1>

@@ -40,12 +40,7 @@ function viewStudent(studentId: string) {
 }
 
 function editStudent(student) {
-  router.push({
-    path: `/students/${student.id}/edit`,
-    query: {
-      student: JSON.stringify(student),
-    },
-  })
+  router.push(`/students/${student.id}/edit`)
 }
 
 async function handleDelete(studentId) {
