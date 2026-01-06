@@ -5,7 +5,7 @@ export async function getStudentList() {
   return data
 }
 
-export async function getSpecificStudent(studentId) {
+export async function getSpecificStudent(studentId: string) {
   const data = await api.get(`/students/${studentId}`);
   return data;
 }
@@ -48,4 +48,12 @@ export async function coursesOfStudent(studentId: string) {
 
 export async function unenrollStudent(studentId: string, courseId: string) {
   await api.delete(`/students/${studentId}/courses/${courseId}`);
+}
+
+export async function createCourse(form) {
+  const v = form.value;
+  await api.post('/courses', {
+    title: v.title,
+    description: v.description ?? '',
+  })
 }

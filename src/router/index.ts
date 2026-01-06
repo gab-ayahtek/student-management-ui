@@ -35,6 +35,11 @@ const router = createRouter({
       component: () => import('../pages/courses/CourseListView.vue'),
     },
     {
+      path: '/courses/create',
+      name: 'courseCreate',
+      component: () => import('../pages/courses/CourseCreateView.vue')
+    },
+    {
       path: '/:pathMatch(.*)*', // Matches all unmatched routes
       name: 'NotFound',
       component: () => import('../pages/NotFoundView.vue'),
