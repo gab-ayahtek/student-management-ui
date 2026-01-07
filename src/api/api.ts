@@ -1,7 +1,8 @@
 import api from './axios';
 
-export async function getStudentList() {
-  const data = await api.get('/students');
+export async function getStudentList(page: number) {
+  const uri = `/students?page=${page}`;
+  const data = await api.get(uri);
   return data;
 }
 

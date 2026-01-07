@@ -1,65 +1,81 @@
 <script lang="ts" setup>
-import { getStudentList, deleteStudent, getCourseList, addStudentToCourse } from '../../api/api'
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { getStudentList, deleteStudent, getCourseList, addStudentToCourse } from '../../api/api';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-const router = useRouter()
+const router = useRouter();
 
-const students = ref([])
+const students = ref([]);
 const selectedStudent = ref({
   id: '',
   name: '',
-})
+});
 const selectedCourse = ref('Choose an option');
-const courses = ref([])
+const courses = ref([]);
+
+const nextPageNum = ref(1);
+const prevPageNum = ref(0);
+const lastPageNum = ref(1);
 
 async function getCourses() {
   if (courses.value.length < 1) {
-    console.log("fetching...");
+    console.log('fetching...');
     courses.value = await getCourseList();
   }
 }
 
-async function fetchStudents() {
-  students.value = await getStudentList()
+async function fetchStudents(loc: string) {
+  const num = loc == 'next' ? nextPageNum.value : prevPageNum.value;
+  if (loc == 'next' && num == lastPageNum.value + 1) return;
+  if (loc == 'prev' && num == 0) return;
+  const data = await getStudentList(num);
+  if (data) {
+    lastPageNum.value = data.last_page;
+    students.value = data.data;
+
+    nextPageNum.value = data.next_page_url
+      ? new URL(data.next_page_url).searchParams.get('page')
+      : data.last_page + 1;
+    prevPageNum.value = data.prev_page_url
+      ? new URL(data.prev_page_url).searchParams.get('page')
+      : 0;
+  }
 }
 
 function selectStudent(student) {
   selectedStudent.value = {
     id: student.id,
-    name: student.first_name + " " + student.last_name,
-  }
+    name: student.first_name + ' ' + student.last_name,
+  };
 }
 
 function createStudent() {
-  router.push('/students/create')
+  router.push('/students/create');
 }
 
 function viewStudent(studentId: string) {
-  router.push(`/students/${studentId}`)
+  router.push(`/students/${studentId}`);
 }
 
 function editStudent(student) {
-  router.push(`/students/${student.id}/edit`)
+  router.push(`/students/${student.id}/edit`);
 }
 
 async function handleDelete(studentId) {
   if (window.confirm('Are you sure?')) {
-    await deleteStudent(studentId)
-    window.location.reload()
+    await deleteStudent(studentId);
+    window.location.reload();
   }
 }
 
 async function handleEnroll() {
-  await addStudentToCourse(selectedStudent.value.id, selectedCourse.value)
-
+  await addStudentToCourse(selectedStudent.value.id, selectedCourse.value);
 }
 
 onMounted(() => {
-  fetchStudents();
+  fetchStudents('next');
   getCourses();
-})
-
+});
 </script>
 <template>
   <div class="d-flex justify-content-between">
@@ -89,8 +105,15 @@ onMounted(() => {
           <td>{{ student.last_name }}</td>
           <td class="text-nowrap">
             <button @click="viewStudent(student.id)" class="btn btn-primary me-2">View</button>
-            <button @click="selectStudent(student)" type="button" data-bs-toggle="modal" data-bs-target="#enroll-modal"
-              class="btn btn-success me-2">Enroll</button>
+            <button
+              @click="selectStudent(student)"
+              type="button"
+              data-bs-toggle="modal"
+              data-bs-target="#enroll-modal"
+              class="btn btn-success me-2"
+            >
+              Enroll
+            </button>
             <button @click="editStudent(student)" class="btn btn-warning me-2">Update</button>
             <button @click="handleDelete(student.id)" class="btn btn-danger">Delete</button>
           </td>
@@ -103,13 +126,33 @@ onMounted(() => {
     </table>
   </div>
 
+  <ul class="d-flex justify-content-end pagination mt-3">
+    <li class="page-item" @click="fetchStudents('prev')">
+      <a class="page-link" href="#">Previous</a>
+    </li>
+    <li class="page-item" @click="fetchStudents('next')">
+      <a class="page-link" href="#">Next</a>
+    </li>
+  </ul>
+
   <!-- MODAL -->
-  <div class="modal fade" id="enroll-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div
+    class="modal fade"
+    id="enroll-modal"
+    tabindex="-1"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+  >
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
         </div>
         <div class="modal-body">
           <div class="bg-primary-subtle p-3 rounded mb-3">
@@ -120,15 +163,25 @@ onMounted(() => {
             <label for="course-select" class="form-label">Select Course</label>
             <select id="course-select" class="form-control" v-model="selectedCourse">
               <option disabled value="">Choose an option...</option>
-              <option v-if="courses.length > 0" v-for="course in courses" v-text="course.title" :value="course.id">
-              </option>
+              <option
+                v-if="courses.length > 0"
+                v-for="course in courses"
+                v-text="course.title"
+                :value="course.id"
+              ></option>
             </select>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button @click="handleEnroll()" data-bs-dismiss="modal" type="button" class="btn btn-primary">Save
-            changes</button>
+          <button
+            @click="handleEnroll()"
+            data-bs-dismiss="modal"
+            type="button"
+            class="btn btn-primary"
+          >
+            Save changes
+          </button>
         </div>
       </div>
     </div>
