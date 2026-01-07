@@ -1,8 +1,8 @@
-import api from './axios'
+import api from './axios';
 
 export async function getStudentList() {
-  const data = await api.get('/students')
-  return data
+  const data = await api.get('/students');
+  return data;
 }
 
 export async function getSpecificStudent(studentId: string) {
@@ -11,18 +11,18 @@ export async function getSpecificStudent(studentId: string) {
 }
 
 export async function getCourseList() {
-  const data = await api.get('/courses')
-  return data
+  const data = await api.get('/courses');
+  return data;
 }
 
 export async function createStudent(form) {
-  const v = form.value
+  const v = form.value;
   await api.post('/students', {
     email: v.email,
     first_name: v.first_name,
     last_name: v.last_name,
     address: v.address,
-  })
+  });
 }
 
 export async function updateStudent(student: any) {
@@ -35,10 +35,10 @@ export async function updateStudent(student: any) {
 }
 
 export async function deleteStudent(id: string) {
-  await api.delete(`/students/${id}`)
+  await api.delete(`/students/${id}`);
 }
 
-export async function addStudentToCourse(studentId:string, courseId:string) {
+export async function addStudentToCourse(studentId: string, courseId: string) {
   await api.post(`/students/${studentId}/courses/${courseId}`);
 }
 
@@ -55,18 +55,22 @@ export async function createCourse(form: any) {
   await api.post('/courses', {
     title: v.title,
     description: v.description ?? '',
-  })
+  });
 }
 
 export async function getSpecificCourse(courseId: string) {
-  return await api.get(`/courses/${courseId}`)
+  return await api.get(`/courses/${courseId}`);
 }
 
 export async function deleteCourse(courseId: string) {
   await api.delete(`/courses/${courseId}`);
 }
 
-export async function updateCourse(courseId: string, courseTitle: string, courseDescription: string) {
+export async function updateCourse(
+  courseId: string,
+  courseTitle: string,
+  courseDescription: string,
+) {
   await api.put(`/courses/${courseId}`, {
     title: courseTitle,
     description: courseDescription,
@@ -74,5 +78,5 @@ export async function updateCourse(courseId: string, courseTitle: string, course
 }
 
 export async function getStudentsEnrolledInCourse(courseId: string) {
-  return await api.get(`/courses/${courseId}/students`)
+  return await api.get(`/courses/${courseId}/students`);
 }

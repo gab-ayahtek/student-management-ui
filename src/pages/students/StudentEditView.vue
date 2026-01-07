@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { getSpecificStudent, updateStudent } from '@/api/api';
 import { onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router';
 
-const route = useRoute()
+const route = useRoute();
 const router = useRouter();
 const student = ref({
   id: '',
@@ -15,15 +15,15 @@ const student = ref({
 
 async function handleSubmit() {
   try {
-    await updateStudent(student);
+    await updateStudent(student.value);
     router.back();
   } catch (error) {
     alert(error.response.data.message);
   }
 }
 onMounted(async () => {
-  student.value = await getSpecificStudent(route.params.id)
-})
+  student.value = await getSpecificStudent(route.params.id);
+});
 </script>
 <template>
   <h1 class="mb-3">Edit student</h1>
