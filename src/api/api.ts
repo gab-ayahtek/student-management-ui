@@ -1,18 +1,19 @@
 import api from './axios';
+import type { Course, PaginatedStudents, Student } from './types';
 
-export async function getStudentList(page: number) {
+export async function getStudentList(page: number): Promise<PaginatedStudents> {
   const uri = `/students?page=${page}`;
-  const data = await api.get(uri);
+  const { data } = await api.get<PaginatedStudents>(uri);
   return data;
 }
 
 export async function getSpecificStudent(studentId: string) {
-  const data = await api.get(`/students/${studentId}`);
+  const data = await api.get<Student>(`/students/${studentId}`);
   return data;
 }
 
-export async function getCourseList() {
-  const data = await api.get('/courses');
+export async function getCourseList(): Promise<Course[]> {
+  const { data } = await api.get<Course[]>('/courses');
   return data;
 }
 

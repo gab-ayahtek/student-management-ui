@@ -1,17 +1,18 @@
 <script lang="ts" setup>
+import type { Course, PaginatedStudents, Student } from '@/api/types';
 import { getStudentList, deleteStudent, getCourseList, addStudentToCourse } from '../../api/api';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-const students = ref([]);
+const students = ref<Student[]>([]);
 const selectedStudent = ref({
   id: '',
   name: '',
 });
 const selectedCourse = ref('Choose an option');
-const courses = ref([]);
+const courses = ref<Course[]>([]);
 
 const nextPageNum = ref(1);
 const prevPageNum = ref(0);
@@ -28,7 +29,7 @@ async function fetchStudents(loc: string) {
   const num = loc == 'next' ? nextPageNum.value : prevPageNum.value;
   if (loc == 'next' && num == lastPageNum.value + 1) return;
   if (loc == 'prev' && num == 0) return;
-  const data = await getStudentList(num);
+  const data: PaginatedStudents = await getStudentList(num);
   if (data) {
     lastPageNum.value = data.last_page;
     students.value = data.data;
@@ -42,7 +43,7 @@ async function fetchStudents(loc: string) {
   }
 }
 
-function selectStudent(student) {
+function selectStudent(student: Student) {
   selectedStudent.value = {
     id: student.id,
     name: student.first_name + ' ' + student.last_name,
@@ -57,11 +58,11 @@ function viewStudent(studentId: string) {
   router.push(`/students/${studentId}`);
 }
 
-function editStudent(student) {
+function editStudent(student: Student) {
   router.push(`/students/${student.id}/edit`);
 }
 
-async function handleDelete(studentId) {
+async function handleDelete(studentId: string) {
   if (window.confirm('Are you sure?')) {
     await deleteStudent(studentId);
     window.location.reload();
@@ -98,31 +99,28 @@ onMounted(() => {
         </tr>
       </thead>
 
-      <tbody>
-        <tr v-for="student in students" :key="student.id" v-if="students.length > 0">
+      <tbody v-if="students.length > 0">
+        <tr v-for="student in students" :key="student.id">
           <td>{{ student.email }}</td>
           <td>{{ student.first_name }}</td>
           <td>{{ student.last_name }}</td>
           <td class="text-nowrap">
             <button @click="viewStudent(student.id)" class="btn btn-primary me-2">View</button>
-            <button
-              @click="selectStudent(student)"
-              type="button"
-              data-bs-toggle="modal"
-              data-bs-target="#enroll-modal"
-              class="btn btn-success me-2"
-            >
+            <button @click="selectStudent(student)" type="button" data-bs-toggle="modal" data-bs-target="#enroll-modal"
+              class="btn btn-success me-2">
               Enroll
             </button>
             <button @click="editStudent(student)" class="btn btn-warning me-2">Update</button>
             <button @click="handleDelete(student.id)" class="btn btn-danger">Delete</button>
           </td>
         </tr>
-
-        <tr v-else>
+      </tbody>
+      <tbody v-else>
+        <tr>
           <td colspan="6" class="text-center text-muted">No students found</td>
         </tr>
       </tbody>
+
     </table>
   </div>
 
@@ -136,23 +134,12 @@ onMounted(() => {
   </ul>
 
   <!-- MODAL -->
-  <div
-    class="modal fade"
-    id="enroll-modal"
-    tabindex="-1"
-    aria-labelledby="exampleModalLabel"
-    aria-hidden="true"
-  >
+  <div class="modal fade" id="enroll-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="bg-primary-subtle p-3 rounded mb-3">
@@ -161,25 +148,16 @@ onMounted(() => {
           </div>
           <form>
             <label for="course-select" class="form-label">Select Course</label>
-            <select id="course-select" class="form-control" v-model="selectedCourse">
+            <select id="course-select" class="form-control" v-model="selectedCourse" v-if="courses.length > 0">
               <option disabled value="">Choose an option...</option>
-              <option
-                v-if="courses.length > 0"
-                v-for="course in courses"
-                v-text="course.title"
-                :value="course.id"
-              ></option>
+              <option v-for="course in courses" v-text="course.title" :value="course.id" :key="course.id">
+              </option>
             </select>
           </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button
-            @click="handleEnroll()"
-            data-bs-dismiss="modal"
-            type="button"
-            class="btn btn-primary"
-          >
+          <button @click="handleEnroll()" data-bs-dismiss="modal" type="button" class="btn btn-primary">
             Save changes
           </button>
         </div>
