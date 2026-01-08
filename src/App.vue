@@ -1,31 +1,44 @@
+<script setup lang="ts">
+import { onMounted } from "vue";
+import "./index.css";
+import { useRoute } from "vue-router"
+
+const route = useRoute();
+
+onMounted(() => {
+  console.log(`Route: ${route.fullPath}`);
+})
+</script>
+
 <template>
-  <div class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 py-3">
-      <div class="container-sm">
-        <router-link class="navbar-brand" to="/">My Portal</router-link>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <router-link class="nav-link" to="/students">Students</router-link>
+  <div class="bg-slate-950 min-h-dvh text-slate-100 font-jakarta pt-4 flex flex-col items-center">
+
+    <div class="w-[95%] max-w-[1200px]">
+
+      <header class="border-slate-800 border-2 bg-slate-900/50 px-6 py-5 rounded-[8px] mb-6">
+        <nav class="flex justify-between items-center">
+          <router-link class="text-xl font-bold tracking-tight hover:text-blue-400" to="/">
+            My Portal
+          </router-link>
+
+          <ul class="flex gap-6 items-center list-none m-0 p-0">
+            <li>
+              <router-link class="hover:text-blue-400 transition-colors" to="/students">
+                Students
+              </router-link>
             </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/courses">Courses</router-link>
+            <li>
+              <router-link class="hover:text-blue-400 transition-colors" to="/courses">
+                Courses
+              </router-link>
             </li>
           </ul>
-        </div>
-      </div>
-    </nav>
+        </nav>
+      </header>
 
-    <div class="container">
-      <router-view />
+      <main>
+        <router-view />
+      </main>
     </div>
-
-    <footer class="bg-dark text-white text-center py-3 mt-auto fs-6">
-      &copy; 2026 - All rights reserved. For educational purposes only.
-    </footer>
   </div>
 </template>

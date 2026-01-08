@@ -3,9 +3,11 @@ import type { Course, PaginatedStudents, Student } from '@/api/types';
 import { getStudentList, deleteStudent, getCourseList, addStudentToCourse } from '../../api/api';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 const router = useRouter();
 
+const searchQuery = ref('');
 const students = ref<Student[]>([]);
 const selectedStudent = ref({
   id: '',
@@ -19,6 +21,11 @@ const prevPageNum = ref<number | null>(null);
 const lastPageNum = ref(0);
 const hasNextPage = ref(false);
 const hasPrevPage = ref(false);
+
+async function handleSearch() {
+  console.log(`search term: ${searchQuery.value}`)
+  searchQuery.value = "";
+}
 
 async function getCourses() {
   if (courses.value.length < 1) {
@@ -79,89 +86,57 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="d-flex justify-content-between">
-    <div>
-      <h2 class="mb-4">Student List</h2>
-    </div>
-    <div>
-      <button @click="createStudent()" class="btn btn-primary">Create</button>
-    </div>
+  <!-- SEARCH BAR -->
+  <h1 class="text-xl text-center py-4">Student List</h1>
+  <div class="flex">
+    <form class="relative pr-4 flex-1" @submit.prevent="handleSearch()">
+      <!-- <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} /> -->
+      <input type="text" placeholder="Search students..." v-model="searchQuery"
+        class="text-sm w-full pl-4 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-400 text-slate-100 placeholder-slate-400" />
+    </form>
+    <button @click="router.push('/students/create')"
+      class="text-sm bg-blue-600/20 cursor-pointer hover:opacity-85 transition-all py-2 px-6 rounded-[8px]">Create
+      Student</button>
   </div>
-
-  <div class="table-responsive">
-    <table class="table table-striped table-hover table-bordered mb-0">
-      <thead>
-        <tr>
-          <th scope="col">Email</th>
-          <th scope="col">First Name</th>
-          <th scope="col">Last Name</th>
-          <th scope="col">Action</th>
-        </tr>
-      </thead>
-
-      <tbody v-if="students.length > 0">
-        <tr v-for="student in students" :key="student.id">
-          <td>{{ student.email }}</td>
-          <td>{{ student.first_name }}</td>
-          <td>{{ student.last_name }}</td>
-          <td class="text-nowrap">
-            <button @click="viewStudent(student.id)" class="btn btn-primary me-2">View</button>
-            <button @click="selectStudent(student)" type="button" data-bs-toggle="modal" data-bs-target="#enroll-modal"
-              class="btn btn-success me-2">
-              Enroll
-            </button>
-            <button @click="editStudent(student)" class="btn btn-warning me-2">Update</button>
-            <button @click="handleDelete(student.id)" class="btn btn-danger">Delete</button>
-          </td>
-        </tr>
-      </tbody>
-      <tbody v-else>
-        <tr>
-          <td colspan="6" class="text-center text-muted">No students found</td>
-        </tr>
-      </tbody>
-
-    </table>
-  </div>
-
-  <ul class="d-flex justify-content-end pagination mt-3">
-    <li class="page-item" :class="{ 'disabled': !hasPrevPage }" @click="retrieveStudents(prevPageNum)">
-      <a class="page-link" href="#">Previous</a>
-    </li>
-    <li class="page-item" :class="{ 'disabled': !hasNextPage }" @click="retrieveStudents(nextPageNum)">
-      <a class="page-link" href="#">Next</a>
-    </li>
-  </ul>
-
-  <!-- MODAL -->
-  <div class="modal fade" id="enroll-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  <!-- CARD -->
+  <div v-for="student in students" :key="student.id" class="pt-3">
+    <div class="border-2 border-slate-800 bg-slate-900/50 py-4 px-6 flex justify-between rounded-[8px]">
+      <div class="flex-1">
+        <h3 class=" font-semibold text-slate-50 mb-1">{{ student.first_name + ' ' + student.last_name }}</h3>
+        <p class="text-xs text-slate-400 pb-3">{{ student.email }}</p>
+        <span class="px-3 py-1 bg-blue-600/20 text-blue-400 text-xs rounded-full border border-blue-600/30">
+          Courses enrolled: 3
+        </span>
+      </div>
+      <div class="flex gap-[1.25rem]">
+        <div class="cursor-pointer h-max" title="View">
+          <font-awesome-icon icon="fa-regular fa-eye" />
         </div>
-        <div class="modal-body">
-          <div class="bg-primary-subtle p-3 rounded mb-3">
-            <p class="mb-2">Selected Student</p>
-            <strong v-text="selectedStudent.name"></strong>
-          </div>
-          <form>
-            <label for="course-select" class="form-label">Select Course</label>
-            <select id="course-select" class="form-control" v-model="selectedCourse" v-if="courses.length > 0">
-              <option disabled value="">Choose an option...</option>
-              <option v-for="course in courses" v-text="course.title" :value="course.id" :key="course.id">
-              </option>
-            </select>
-          </form>
+        <div class="cursor-pointer h-max" title="Enroll">
+          <font-awesome-icon icon="fa-regular fa-calendar-plus" />
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button @click="handleEnroll()" data-bs-dismiss="modal" type="button" class="btn btn-primary">
-            Save changes
-          </button>
+        <div class="cursor-pointer h-max" title="Edit">
+          <font-awesome-icon icon="fa-regular fa-pen-to-square" />
+        </div>
+        <div class="cursor-pointer h-max" title="Delete">
+          <font-awesome-icon icon="fa-regular fa-trash-can" />
         </div>
       </div>
     </div>
+  </div>
+
+  <h1 v-if="students.length < 1" class="text-center">No students registered.</h1>
+
+  <div class="flex justify-end gap-3 pt-3">
+    <button class="py-2 bg-slate-900 border-1 border-slate-700 w-[5rem] rounded-[4px]"
+      :class="{ 'opacity-50': !hasPrevPage, 'cursor-pointer': hasPrevPage, 'hover:opacity-85': hasPrevPage }"
+      @click="retrieveStudents(prevPageNum)">
+      Prev
+    </button>
+    <button class="py-2 bg-slate-900 border-1 border-slate-700 w-[5rem] rounded-[4px]"
+      :class="{ 'opacity-50': !hasNextPage, 'cursor-pointer': hasNextPage, 'hover:opacity-85': hasNextPage }"
+      @click="retrieveStudents(nextPageNum)">
+      Next
+    </button>
   </div>
 </template>

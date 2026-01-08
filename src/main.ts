@@ -3,10 +3,13 @@ import './assets/main.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap/dist/js/bootstrap.bundle.min.js' // Includes Popper.js
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faTrashCan, faPenToSquare, faEye, faCalendarPlus } from '@fortawesome/free-regular-svg-icons'
 
-const app = createApp(App)
+library.add(faTrashCan, faPenToSquare, faEye, faCalendarPlus)
+
+const app = createApp(App).component('font-awesome-icon', FontAwesomeIcon);
 
 app.use(router)
 
