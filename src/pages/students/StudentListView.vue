@@ -14,32 +14,32 @@ const selectedStudent = ref({
 const selectedCourse = ref('Choose an option');
 const courses = ref<Course[]>([]);
 
-const nextPageNum = ref(1);
-const prevPageNum = ref(0);
-const lastPageNum = ref(1);
+const nextPageNum = ref<number | null>(1);
+const prevPageNum = ref<number | null>(null);
+const lastPageNum = ref(0);
+const hasNextPage = ref(false);
+const hasPrevPage = ref(false);
 
 async function getCourses() {
   if (courses.value.length < 1) {
-    console.log('fetching...');
+    console.log('fetching course list...');
     courses.value = await getCourseList();
   }
 }
 
-async function fetchStudents(loc: string) {
-  const num = loc == 'next' ? nextPageNum.value : prevPageNum.value;
-  if (loc == 'next' && num == lastPageNum.value + 1) return;
-  if (loc == 'prev' && num == 0) return;
-  const data: PaginatedStudents = await getStudentList(num);
+async function retrieveStudents(page: number | null) {
+  if (page == null) return;
+
+  console.log('fetching student list...');
+  const data: PaginatedStudents = await getStudentList(page);
   if (data) {
     lastPageNum.value = data.last_page;
     students.value = data.data;
+    hasNextPage.value = data.current_page < lastPageNum.value;
+    hasPrevPage.value = data.current_page > 1;
 
-    nextPageNum.value = data.next_page_url
-      ? new URL(data.next_page_url).searchParams.get('page')
-      : data.last_page + 1;
-    prevPageNum.value = data.prev_page_url
-      ? new URL(data.prev_page_url).searchParams.get('page')
-      : 0;
+    nextPageNum.value = data.next_page_url ? Number(new URL(data.next_page_url).searchParams.get("page")) : null;
+    prevPageNum.value = data.prev_page_url ? Number(new URL(data.prev_page_url).searchParams.get("page")) : null;
   }
 }
 
@@ -74,7 +74,7 @@ async function handleEnroll() {
 }
 
 onMounted(() => {
-  fetchStudents('next');
+  retrieveStudents(nextPageNum.value);
   getCourses();
 });
 </script>
@@ -125,10 +125,10 @@ onMounted(() => {
   </div>
 
   <ul class="d-flex justify-content-end pagination mt-3">
-    <li class="page-item" @click="fetchStudents('prev')">
+    <li class="page-item" :class="{ 'disabled': !hasPrevPage }" @click="retrieveStudents(prevPageNum)">
       <a class="page-link" href="#">Previous</a>
     </li>
-    <li class="page-item" @click="fetchStudents('next')">
+    <li class="page-item" :class="{ 'disabled': !hasNextPage }" @click="retrieveStudents(nextPageNum)">
       <a class="page-link" href="#">Next</a>
     </li>
   </ul>

@@ -3,7 +3,7 @@ import type { Course, PaginatedStudents, Student } from './types';
 
 export async function getStudentList(page: number): Promise<PaginatedStudents> {
   const uri = `/students?page=${page}`;
-  const { data } = await api.get<PaginatedStudents>(uri);
+  const data = await api.get(uri) as PaginatedStudents;
   return data;
 }
 
@@ -13,7 +13,7 @@ export async function getSpecificStudent(studentId: string) {
 }
 
 export async function getCourseList(): Promise<Course[]> {
-  const { data } = await api.get<Course[]>('/courses');
+  const data = await api.get('/courses') as Course[];
   return data;
 }
 

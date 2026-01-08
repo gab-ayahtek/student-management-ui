@@ -8,6 +8,7 @@ export type Student = {
 
 export type PaginatedStudents = {
     current_page: number;
+    first_page: number;
     last_page: number;
     data: Student[];
     next_page_url: string;
