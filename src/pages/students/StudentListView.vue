@@ -4,8 +4,11 @@ import { getStudentList, deleteStudent, getCourseList, addStudentToCourse } from
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import CreateStudentModal from "@/components/CreateStudentModal.vue"
 
 const router = useRouter();
+
+const isCreateStudentModalOpen = ref(false);
 
 const searchQuery = ref('');
 const students = ref<Student[]>([]);
@@ -94,13 +97,13 @@ onMounted(() => {
       <input type="text" placeholder="Search students..." v-model="searchQuery"
         class="text-sm w-full pl-4 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-400 text-slate-100 placeholder-slate-400" />
     </form>
-    <button @click="router.push('/students/create')"
-      class="text-sm bg-blue-600/20 cursor-pointer hover:opacity-85 transition-all py-2 px-6 rounded-[8px]">Create
+    <button @click="isCreateStudentModalOpen = true"
+      class="text-sm bg-blue-600/20 cursor-pointer hover:opacity-85 transition-all py-2 px-6 rounded-lg">Create
       Student</button>
   </div>
   <!-- CARD -->
   <div v-for="student in students" :key="student.id" class="pt-3">
-    <div class="border-2 border-slate-800 bg-slate-900/50 py-4 px-6 flex justify-between rounded-[8px]">
+    <div class="border-2 border-slate-800 bg-slate-900/50 py-4 px-6 flex justify-between rounded-lg">
       <div class="flex-1">
         <h3 class=" font-semibold text-slate-50 mb-1">{{ student.first_name + ' ' + student.last_name }}</h3>
         <p class="text-xs text-slate-400 pb-3">{{ student.email }}</p>
@@ -108,7 +111,7 @@ onMounted(() => {
           Courses enrolled: 3
         </span>
       </div>
-      <div class="flex gap-[1.25rem]">
+      <div class="flex gap-5">
         <div class="cursor-pointer h-max" title="View">
           <font-awesome-icon icon="fa-regular fa-eye" />
         </div>
@@ -128,15 +131,18 @@ onMounted(() => {
   <h1 v-if="students.length < 1" class="text-center">No students registered.</h1>
 
   <div class="flex justify-end gap-3 pt-3">
-    <button class="py-2 bg-slate-900 border-1 border-slate-700 w-[5rem] rounded-[4px]"
+    <button class="py-2 bg-slate-900 border-1 border-slate-700 w-[5rem] rounded-sm"
       :class="{ 'opacity-50': !hasPrevPage, 'cursor-pointer': hasPrevPage, 'hover:opacity-85': hasPrevPage }"
       @click="retrieveStudents(prevPageNum)">
       Prev
     </button>
-    <button class="py-2 bg-slate-900 border-1 border-slate-700 w-[5rem] rounded-[4px]"
+    <button class="py-2 bg-slate-900 border-1 border-slate-700 w-[5rem] rounded-sm"
       :class="{ 'opacity-50': !hasNextPage, 'cursor-pointer': hasNextPage, 'hover:opacity-85': hasNextPage }"
       @click="retrieveStudents(nextPageNum)">
       Next
     </button>
   </div>
+
+  <CreateStudentModal :courses="courses" :is-modal-open="isCreateStudentModalOpen"
+    @response="isCreateStudentModalOpen = false" />
 </template>
