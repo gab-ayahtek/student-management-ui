@@ -1,3 +1,5 @@
+import type { InjectionKey, Ref } from "vue";
+
 export type Student = {
     id: string;
     email: string;
@@ -19,4 +21,12 @@ export type Course = {
     id: string;
     title: string;
     description: string;
+    enrolled?: boolean;
 }
+
+export type CourseContext = {
+    courses: Ref<Course[]>;
+    toggleCourse: (id: string) => void;
+}
+
+export const CourseKey: InjectionKey<CourseContext> = Symbol("CourseContext");

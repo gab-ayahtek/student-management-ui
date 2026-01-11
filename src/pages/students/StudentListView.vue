@@ -1,22 +1,14 @@
 <script lang="ts" setup>
-import type { Course, PaginatedStudents, Student } from '@/api/types';
-import { getStudentList, deleteStudent, getCourseList, addStudentToCourse } from '../../api/api';
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { CourseKey, type Course, type PaginatedStudents, type Student } from '@/api/types';
+import { getStudentList, deleteStudent, getCourseList } from '../../api/api';
+import { ref, onMounted, provide } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import CreateStudentModal from "@/components/CreateStudentModal.vue"
-
-const router = useRouter();
 
 const isCreateStudentModalOpen = ref(false);
 
 const searchQuery = ref('');
 const students = ref<Student[]>([]);
-const selectedStudent = ref({
-  id: '',
-  name: '',
-});
-const selectedCourse = ref('Choose an option');
 const courses = ref<Course[]>([]);
 
 const nextPageNum = ref<number | null>(1);
@@ -25,16 +17,25 @@ const lastPageNum = ref(0);
 const hasNextPage = ref(false);
 const hasPrevPage = ref(false);
 
+function toggleCourse(id: string) {
+  const course = courses.value?.find(c => c.id === id);
+  if (course) course.enrolled = !course.enrolled;
+}
+
+provide(CourseKey, {
+  courses,
+  toggleCourse
+})
+
 async function handleSearch() {
   console.log(`search term: ${searchQuery.value}`)
   searchQuery.value = "";
 }
 
 async function getCourses() {
-  if (courses.value.length < 1) {
-    console.log('fetching course list...');
-    courses.value = await getCourseList();
-  }
+  console.log('fetching course list...');
+  const courseList = await getCourseList();
+  courses.value = courseList.map(c => ({ ...c, enrolled: false }));
 }
 
 async function retrieveStudents(page: number | null) {
@@ -53,34 +54,12 @@ async function retrieveStudents(page: number | null) {
   }
 }
 
-function selectStudent(student: Student) {
-  selectedStudent.value = {
-    id: student.id,
-    name: student.first_name + ' ' + student.last_name,
-  };
-}
 
-function createStudent() {
-  router.push('/students/create');
-}
-
-function viewStudent(studentId: string) {
-  router.push(`/students/${studentId}`);
-}
-
-function editStudent(student: Student) {
-  router.push(`/students/${student.id}/edit`);
-}
-
-async function handleDelete(studentId: string) {
-  if (window.confirm('Are you sure?')) {
-    await deleteStudent(studentId);
+async function handleDelete(student: Student) {
+  if (window.confirm(`Delete ${student.first_name} ${student.last_name}?`)) {
+    await deleteStudent(student.id);
     window.location.reload();
   }
-}
-
-async function handleEnroll() {
-  await addStudentToCourse(selectedStudent.value.id, selectedCourse.value);
 }
 
 onMounted(() => {
@@ -121,7 +100,7 @@ onMounted(() => {
         <div class="cursor-pointer h-max" title="Edit">
           <font-awesome-icon icon="fa-regular fa-pen-to-square" />
         </div>
-        <div class="cursor-pointer h-max" title="Delete">
+        <div class="cursor-pointer h-max" title="Delete" @click="handleDelete(student)">
           <font-awesome-icon icon="fa-regular fa-trash-can" />
         </div>
       </div>
@@ -131,18 +110,17 @@ onMounted(() => {
   <h1 v-if="students.length < 1" class="text-center">No students registered.</h1>
 
   <div class="flex justify-end gap-3 pt-3">
-    <button class="py-2 bg-slate-900 border-1 border-slate-700 w-[5rem] rounded-sm"
+    <button class="py-2 bg-slate-900 border border-slate-700 w-20 rounded-sm"
       :class="{ 'opacity-50': !hasPrevPage, 'cursor-pointer': hasPrevPage, 'hover:opacity-85': hasPrevPage }"
       @click="retrieveStudents(prevPageNum)">
       Prev
     </button>
-    <button class="py-2 bg-slate-900 border-1 border-slate-700 w-[5rem] rounded-sm"
+    <button class="py-2 bg-slate-900 border border-slate-700 w-20 rounded-sm"
       :class="{ 'opacity-50': !hasNextPage, 'cursor-pointer': hasNextPage, 'hover:opacity-85': hasNextPage }"
       @click="retrieveStudents(nextPageNum)">
       Next
     </button>
   </div>
 
-  <CreateStudentModal :courses="courses" :is-modal-open="isCreateStudentModalOpen"
-    @response="isCreateStudentModalOpen = false" />
+  <CreateStudentModal :is-modal-open="isCreateStudentModalOpen" @response="isCreateStudentModalOpen = false" />
 </template>
