@@ -1,9 +1,9 @@
-import api from './axios';
-import type { Course, PaginatedStudents, Student } from './types';
+import api from "./axios";
+import type { Course, PaginatedStudents, Student, StudentForm } from "./types";
 
 export async function getStudentList(page: number): Promise<PaginatedStudents> {
   const uri = `/students?page=${page}`;
-  const data = await api.get(uri) as PaginatedStudents;
+  const data = (await api.get(uri)) as PaginatedStudents;
   return data;
 }
 
@@ -13,17 +13,17 @@ export async function getSpecificStudent(studentId: string) {
 }
 
 export async function getCourseList(): Promise<Course[]> {
-  const data = await api.get('/courses') as Course[];
+  const data = (await api.get("/courses")) as Course[];
   return data;
 }
 
-export async function createStudent(form) {
-  const v = form.value;
-  await api.post('/students', {
-    email: v.email,
-    first_name: v.first_name,
-    last_name: v.last_name,
-    address: v.address,
+export async function createStudent(student: StudentForm, courses: string[]) {
+  await api.post("/students", {
+    email: student.email,
+    first_name: student.firstName,
+    last_name: student.lastName,
+    address: student.address,
+    courses: courses,
   });
 }
 
@@ -54,9 +54,9 @@ export async function unenrollStudent(studentId: string, courseId: string) {
 
 export async function createCourse(form: any) {
   const v = form.value;
-  await api.post('/courses', {
+  await api.post("/courses", {
     title: v.title,
-    description: v.description ?? '',
+    description: v.description ?? "",
   });
 }
 

@@ -2,7 +2,8 @@
 import { inject, reactive } from "vue";
 import ModalTextInput from "./ModalTextInput.vue";
 import ModalCourseList from "./ModalCourseList.vue";
-import { CourseKey } from "@/api/types";
+import { CourseKey, type StudentForm } from "@/api/types";
+import { createStudent } from "@/api/api";
 
 const context = inject(CourseKey);
 
@@ -20,7 +21,7 @@ function handleCloseModal() {
   emit("response", false);
 }
 
-function getFormInitialState() {
+function getFormInitialState(): StudentForm {
   return {
     firstName: "",
     lastName: "",
@@ -29,12 +30,14 @@ function getFormInitialState() {
   };
 }
 
-function handleSubmit() {
-  console.log(`student name: ${form.firstName} ${form.lastName}`);
-  const enrolledCourses = courses.value.filter((c) => c.enrolled);
-  console.log(enrolledCourses);
+async function handleSubmit() {
+  const enrolledCourses = courses.value
+    .filter((c) => c.enrolled)
+    .map((c) => c.id);
+  await createStudent(form, enrolledCourses);
   clearForm();
   handleCloseModal();
+  window.location.reload();
 }
 
 function clearForm() {
