@@ -6,7 +6,7 @@ const context = inject(CourseKey);
 
 if (!context) throw new Error("Could not resolve CourseContext");
 
-const { courses, toggleCourse } = context;
+const { courses } = context;
 </script>
 
 <template>
@@ -20,7 +20,7 @@ const { courses, toggleCourse } = context;
           class="flex items-center gap-3 p-3 bg-slate-800/30 rounded-lg hover:bg-slate-800/50 cursor-pointer transition-colors"
         >
           <input
-            @change="toggleCourse(course.id)"
+            v-model="course.enrolled"
             type="checkbox"
             class="w-4 h-4 rounded border-slate-600 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-900"
           />
